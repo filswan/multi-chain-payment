@@ -13,18 +13,18 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  const recipientAddress = "0xEC9Ee466a7372A4D49f64AAF4d348dBE9b5DE02A";
-  const gatewayContractAddress = "0xad8cE271beE7b917F2a1870C8b64EDfF6aAF3342";
+  const recipientAddress = "0xE53AEd6DEA9e44116D4551a93eEeE28bC8684916";
+  const gatewayContractAddress = "0x5210ED929B5BEdBFFBA2F6b9A0b1B608eEAb3aa0";
 
-  const cid = "bafykbzaceafdasngafrordoboczbmp4enweo7omqelfgcjf3cty6tnlpjqw72";
+  const cid = "bafk2bzaceb7cp727fxdrzudlgvsoivdwscydp35eb6wc3bzuflggfdhfa4rfe";
 
-  const minPay10Native = ethers.utils.parseEther("0.011");
+  const minPay10Native = ethers.utils.parseEther("0.03");
 
   const [payer] = await ethers.getSigners();
 
   const fee = {
     // To convert Ether to Wei:
-    value: ethers.utils.parseEther("0.021")     // ether in this case MUST be a string
+    value: ethers.utils.parseEther("0.05")     // ether in this case MUST be a string
   };
 
   const contract = await hre.ethers.getContractFactory("SwanPayment");

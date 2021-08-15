@@ -15,6 +15,7 @@ require (
 	github.com/gin-gonic/gin v1.3.0
 	github.com/itsjamie/gin-cors v0.0.0-20160420130702-97b4a9da7933
 	github.com/joho/godotenv v1.3.0
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/rs/zerolog v1.23.0
 	github.com/sirupsen/logrus v1.2.0

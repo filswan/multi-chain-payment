@@ -46,12 +46,12 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
       "bb2ab0f910c23824b521af2920a7779077bd261133de5993802d22e9a2cfbba4" ],
     },
     goerli: {
-      url: "https://goerli.infura.io/v3/48f20ab65d0142c58e8e73658940a533",
+      url: "https://goerli.infura.io/v3/a30f13ea65fe406a86783fa912982906",
       accounts: [process.env.ownerPK]
     },
     matictest: {
       url: "https://rpc-mumbai.maticvigil.com",
-      accounts: ["0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"]
+      accounts: [process.env.ownerPK]
     },
   },
   solidity: {
