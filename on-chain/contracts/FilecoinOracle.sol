@@ -63,6 +63,7 @@ contract FilecoinOracle {
         returns (uint256 actualPaid)
     {
         // default value is 0
+        // todo: every oracle should update the same actual paid.
         mapping(address => TxOracleStatus) storage status = statusMap[txId];
         for(uint8 i = 0; i < _daoUsers.length; i++){
             if(status[_daoUsers[i]].actualPaid == 0){

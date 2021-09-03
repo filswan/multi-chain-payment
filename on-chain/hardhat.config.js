@@ -53,6 +53,10 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
       url: "https://rpc-mumbai.maticvigil.com",
       accounts: [process.env.ownerPK]
     },
+    bsctest: {
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+      accounts: [process.env.bscTestOwnerPK]
+    },
   },
   solidity: {
     version: "0.8.4",
