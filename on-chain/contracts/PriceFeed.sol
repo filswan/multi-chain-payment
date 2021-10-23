@@ -7,27 +7,37 @@ import "hardhat/console.sol";
 contract PriceFeed is Initializable, IPriceFeed {
 
 
-    address private dexPair;
+    address private _dexPair;
     address private _owner;
 
-    function initialize(address owner) public initializer {
+    uint8 private _tokenIndex; // can only be 0 or 1
+
+    function initialize(address owner, address dexPair, uint8 tokenIndex) public initializer {
         _owner = owner;
+        _dexPair = dexPair;
+        _tokenIndex = tokenIndex;
     }
 
 
     function getSwapAmount(
-        address token1,
-        address token2,
-        uint256 amount1,
-        uint256 amount2
+        uint256 amount
     ) external view returns (uint256){
-        (uint112 _reserve1, uint112 _reserve2, uint32 _blockTimestampLast) = dexPair.call(abi.encodeWithSignature("getReserves()"));
+        require(amount>0, "amount must greater than 0");
+        (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast) = _dexPair.call(abi.encodeWithSignature("getReserves()"));
         uint256 cp = uint(_reserve0).mul(_reserve1).mul(1000**2);
-        if(amount1 > 0){
-            uint256 amt = cp.div(_reserve1.sub(amount1));
-        }else{
-            uint256 amt = cp.div(_reserve2.sub(amount2));
+        uint256 retAmount = 0;
+
+        if(_tokenIndex == 0){
+            uint256 tAmt = _reserve0.sub(amount);
+            require(tAmt>0, "not enough token to get price");
+            uint256 amt = cp.div(tAmt);
+            retAmount = _reserve1.sub(amt);
+        }else if(_tokenIndex == 1){
+            uint256 tAmt = _reserve1.sub(amount);
+            require(tAmt>0, "not enough token to get price");
+            uint256 amt = cp.div(tAmt);
+            retAmount = _reserve0.sub(amt);
         }
-        return 
+        return retAmount;
     }
 }

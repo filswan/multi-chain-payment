@@ -2,26 +2,30 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "hardhat/console.sol";
 import "./interfaces/IPaymentGateway.sol";
 import "./FilecoinOracle.sol";
+import "./interfaces/IPriceFeed.sol";
 
 contract SwanPayment is IPaymentMinimal, Initializable {
+    address public constant NATIVE_TOKEN =
+        0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    address public constant NATIVE_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address private _ERC20_TOKEN;
 
     address private _owner;
     address private _oracle;
     address private _priceFeed;
-    uint256 lockTime = 1 days;
+
+    uint256 lockTime = 5 days;
     mapping(string => TxInfo) txMap;
 
-    
-    function initialize(address owner) public initializer {
+    function initialize(address owner, address ERC20_TOKEN) public initializer {
         _owner = owner;
+        _ERC20_TOKEN = ERC20_TOKEN;
     }
-
 
     constructor(address owner) public {
         _owner = owner;
@@ -36,6 +40,15 @@ contract SwanPayment is IPaymentMinimal, Initializable {
     }
 
     function setOracle(address oracle) public onlyOwner returns (bool) {
+        _oracle = oracle;
+        return true;
+    }
+
+    function setPricefeedParam(address dexPair, uint8 coinIndex)
+        public
+        onlyOwner
+        returns (bool)
+    {
         _oracle = oracle;
         return true;
     }
@@ -58,7 +71,6 @@ contract SwanPayment is IPaymentMinimal, Initializable {
         return txMap[txId];
     }
 
-
     event LockPayment(
         string id,
         address token,
@@ -77,8 +89,14 @@ contract SwanPayment is IPaymentMinimal, Initializable {
         override
         returns (bool)
     {
-        require(!txMap[param.id]._isExisted, "Payment of transaction is already locked");
-        require(param.minPayment > 0 && msg.value > param.minPayment, "payment should greater than min payment");
+        require(
+            !txMap[param.id]._isExisted,
+            "Payment of transaction is already locked"
+        );
+        require(
+            param.minPayment > 0 && msg.value > param.minPayment,
+            "payment should greater than min payment"
+        );
         TxInfo storage t = txMap[param.id];
         t.owner = msg.sender;
         t.minPayment = param.minPayment;
@@ -105,8 +123,17 @@ contract SwanPayment is IPaymentMinimal, Initializable {
         public
         returns (bool)
     {
-        require(!txMap[param.id]._isExisted, "Payment of transaction is already locked");
-        require(param.minPayment > 0 && param.amount > param.minPayment, "payment should greater than min payment");
+        require(
+            !txMap[param.id]._isExisted,
+            "Payment of transaction is already locked"
+        );
+        require(
+            param.minPayment > 0 && param.amount > param.minPayment,
+            "payment should greater than min payment"
+        );
+
+        // todo: approve and transfer token into contract.
+
         TxInfo storage t = txMap[param.id];
         t.owner = msg.sender;
         t.token = param.token;
@@ -143,14 +170,16 @@ contract SwanPayment is IPaymentMinimal, Initializable {
         );
         // if passed deadline, return payback to user
         if (block.timestamp > t.deadline) {
-            require(t.owner == msg.sender, "Tx passed deadline, only owner can get locked tokens");
+            require(
+                t.owner == msg.sender,
+                "Tx passed deadline, only owner can get locked tokens"
+            );
             t._isExisted = false;
 
             payable(address(t.owner)).transfer(t.lockedFee);
         } else {
             uint256 actualFee = FilecoinOracle(_oracle).getPaymentInfo(txId);
             require(actualFee > 0, "Transaction is incompleted");
-
 
             // todo: add convert rate function to get latest price
 
@@ -160,11 +189,11 @@ contract SwanPayment is IPaymentMinimal, Initializable {
             t._isExisted = false;
 
             console.log("actualFee is %s", actualFee);
-             console.log("locked fee is %s", t.lockedFee);
-            
+            console.log("locked fee is %s", t.lockedFee);
+
             if (t.lockedFee > actualFee) {
                 payable(address(t.owner)).transfer(t.lockedFee - actualFee);
-            }else{
+            } else {
                 actualFee = t.lockedFee;
             }
             payable(address(t.recipient)).transfer(actualFee);
@@ -183,64 +212,68 @@ contract SwanPayment is IPaymentMinimal, Initializable {
     /// @notice Returns the current allowance given to a spender by an owner
     /// @param txId transaction id
     /// @return Returns true for a successful payment, false for an unsuccessful payment
-    function unlockTokenPayment(string calldata txId)
-        public
-        override
-        returns (bool)
-    {
-        TxInfo storage t = txMap[txId];
+    function unlockTokenPayment(
+        string cid,
+        string orderId,
+        string dealId,
+        uint256 paid,
+        address recipient
+    ) public override returns (bool) {
+        // todo: should pass cid, orderid, dealid etc into
+        TxInfo storage t = txMap[cid];
         require(t._isExisted, "Transaction does not exist");
-        require(
-            t.owner == msg.sender || t.recipient == msg.sender,
-            "Invalid caller"
-        );
+
         // if passed deadline, return payback to user
         if (block.timestamp > t.deadline) {
-            require(t.owner == msg.sender, "Tx passed deadline, only owner can get locked tokens");
+            require(
+                t.owner == msg.sender,
+                "Tx passed deadline, only owner can get locked tokens"
+            );
             t._isExisted = false;
-
+            t.minPayment = 0;
+            t.lockedFee = 0;
             //payable(address(t.owner)).transfer(t.lockedFee);
-            // todo: transfer token back
-
+            IERC20(_ERC20_TOKEN).transfer(t.owner, t.lockedFee);
         } else {
-            uint256 actualFee = FilecoinOracle(_oracle).getPaymentInfo(txId);
-            require(actualFee > 0, "Transaction is incompleted");
+            require(paid > 0, "Transaction is incompleted");
 
+            require(
+                FilecoinOracle(_oracle).isPaymentAvailable(
+                    cid,
+                    orderId,
+                    dealId,
+                    paid,
+                    recipient,
+                    true
+                ),
+                "not enough votes"
+            );
+            // get latest price
+            uint256 tokenAmount = IPriceFeed(_priceFeed).getSwapAmount(paid);
 
-            // todo: add convert rate function to get latest price
-
-            if (actualFee < t.minPayment) {
-                actualFee = t.minPayment;
+            if (tokenAmount < t.minPayment) {
+                tokenAmount = t.minPayment;
             }
             t._isExisted = false;
 
-            console.log("actualFee is %s", actualFee);
-             console.log("locked fee is %s", t.lockedFee);
-            
-            if (t.lockedFee > actualFee) {
+            console.log("actual token is %s", tokenAmount);
+
+            if (t.lockedFee > tokenAmount) {
+                uint256 tmp = t.lockedFee;
+                t.lockedFee = 0; // prevent re-entrying
+                IERC20(_ERC20_TOKEN).transfer(t.owner, tmp - tokenAmount);
                 // payable(address(t.owner)).transfer(t.lockedFee - actualFee);
-            }else{
-                actualFee = t.lockedFee;
+            } else {
+                tokenAmount = t.lockedFee;
+                t.lockedFee = 0; // prevent re-entrying
             }
+            IERC20(_ERC20_TOKEN).transfer(recipient, tokenAmount);
             // payable(address(t.recipient)).transfer(actualFee);
         }
-        t.minPayment = 0;
-        t.lockedFee = 0;
-        // todo: get status from oralce/other contract, status include status, real fee
-        // check status, if not complete, return
 
         return true;
         // real fee is greater than tx.fee, take tx.fee
         // real fee is less than tx.minPayment, take minPayment, return tx.fee - minPayment to tx.owner
         // otherwise, take real fee, return tx.fee - real fee to tx.owner
     }
-
-    // function greet() public view returns (string memory) {
-    //   return greeting;
-    // }
-
-    // function setGreeting(string memory _greeting) public {
-    //   console.log("Changing greeting from '%s' to '%s'", greeting, _greeting);
-    //   greeting = _greeting;
-    // }
 }
