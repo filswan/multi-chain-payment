@@ -1,5 +1,8 @@
+require('@openzeppelin/hardhat-upgrades');
 require("@nomiclabs/hardhat-waffle");
-require('dotenv').config()
+require('dotenv').config();
+
+
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -24,7 +27,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     hardhat: {
       forking:{
         url: "https://eth-mainnet.alchemyapi.io/v2/FjSVplPnI6oBEN8dUcwVfr_sMZTpOuUx",
-        blockNumber: 12840313
+        blockNumber: 13247494
       }
     },
 

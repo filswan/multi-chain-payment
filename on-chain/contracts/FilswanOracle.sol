@@ -4,21 +4,30 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "hardhat/console.sol";
 
-contract FilecoinOracle is Initializable {
+contract FilswanOracle is Initializable {
+
     struct TxOracleStatus {
-        uint256 actualPaid;
-        uint256 timestamp;
+        uint256 paid;
+        uint256 terms;
+        address receiving_address;
     }
 
     address private _owner;
+    address private _admin;
     address[] private _daoUsers;
     mapping(string => mapping(address => TxOracleStatus)) statusMap;
 
-    uint8 private _threshold; // threhold to agree off-chain payment info
-
-    function initialize(address owner, uint8 threshold) public initializer {
+    event SignTransaction(
+        string cid,
+        string orderId,
+        string dealId,
+        address recipient,
+        uint256 paid,
+        uint256 terms,
+        bool status
+    );
+    function initialize(address owner) public initializer {
         _owner = owner;
-        _threshold = threshold;
     }
 
     constructor(address owner) {
@@ -32,6 +41,15 @@ contract FilecoinOracle is Initializable {
         require(_owner == msg.sender, "Caller is not the owner");
         _;
     }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyAdmin() {
+        require(_admin == msg.sender, "Caller is not the admin");
+        _;
+    }
+
 
     /**
      * @dev Throws if called by any account other than the owner.
@@ -57,13 +75,26 @@ contract FilecoinOracle is Initializable {
         return true;
     }
 
-    // /**
-    //  * @dev Throws if called by any account other than the owner.
-    //  */
-    // modifier onlyParticipant() {
-    //     require(_owner == msg.sender, "Caller is not the owner");
-    //     _;
-    // }
+   function signTransaction(string cid,
+        string orderId,
+        string dealId,
+        uint256 paid,
+        address recipient,
+        uint256 terms,
+        bool status) public onlyDAOUser{
+        // todo: combine cid, orderId, dealId as key
+
+        emit SignTransaction(
+            cid,
+            orderId,
+            dealId,
+            recipient,
+            paid,
+            terms,
+            status
+        );
+   }
+
 
     function getPaymentInfo(string calldata txId)
         public
@@ -71,7 +102,7 @@ contract FilecoinOracle is Initializable {
         returns (uint256 actualPaid)
     {
         // default value is 0
-        // todo: every oracle should update the same payment info.
+        // todo: every oracle should update the same actual paid.
         mapping(address => TxOracleStatus) storage status = statusMap[txId];
         for (uint8 i = 0; i < _daoUsers.length; i++) {
             if (status[_daoUsers[i]].actualPaid == 0) {
@@ -82,17 +113,5 @@ contract FilecoinOracle is Initializable {
         return status[_daoUsers[0]].actualPaid;
     }
 
-    // todo: add only DAO group users
-    function updatePaymentInfo(string calldata txId, uint256 actualPaid)
-        public
-        onlyDAOUser
-        returns (bool)
-    {
-        // default value is 0
-        if (statusMap[txId][msg.sender].timestamp == 0) {
-            statusMap[txId][msg.sender].timestamp = block.timestamp;
-            statusMap[txId][msg.sender].actualPaid = actualPaid;
-        }
-        return true;
-    }
+
 }
