@@ -2,10 +2,12 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "hardhat/console.sol";
 
 contract PriceFeed is Initializable, IPriceFeed {
 
+     using SafeMath  for uint;
 
     address private _dexPair;
     address private _owner;
@@ -18,7 +20,6 @@ contract PriceFeed is Initializable, IPriceFeed {
         _tokenIndex = tokenIndex;
     }
 
-
     function getSwapAmount(
         uint256 amount
     ) external view returns (uint256){
@@ -29,12 +30,12 @@ contract PriceFeed is Initializable, IPriceFeed {
 
         if(_tokenIndex == 0){
             uint256 tAmt = _reserve0.sub(amount);
-            require(tAmt>0, "not enough token to get price");
+            require(tAmt>0, "not enough token to return");
             uint256 amt = cp.div(tAmt);
             retAmount = _reserve1.sub(amt);
         }else if(_tokenIndex == 1){
             uint256 tAmt = _reserve1.sub(amount);
-            require(tAmt>0, "not enough token to get price");
+            require(tAmt>0, "not enough token to return");
             uint256 amt = cp.div(tAmt);
             retAmount = _reserve0.sub(amt);
         }
