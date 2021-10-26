@@ -49,7 +49,7 @@ interface IPaymentMinimal {
     /// @return Returns true for a successful payment, false for an unsuccessful payment
     function unlockPayment(string calldata txId) external returns (bool);
 
-    function lockTokenPayment(lockPaymentParam calldata param) external (bool);
+    function lockTokenPayment(lockPaymentParam calldata param) external returns (bool);
 
     function unlockTokenPayment(unlockPaymentParam calldata param) external returns (bool);
 

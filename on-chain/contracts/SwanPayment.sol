@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "hardhat/console.sol";
 import "./interfaces/IPaymentGateway.sol";
-import "./FilecoinOracle.sol";
+import "./FilswanOracle.sol";
 import "./interfaces/IPriceFeed.sol";
 
 contract SwanPayment is IPaymentMinimal, Initializable {
@@ -44,14 +44,6 @@ contract SwanPayment is IPaymentMinimal, Initializable {
         return true;
     }
 
-    // /**
-    //  * @dev Throws if called by any account other than the owner.
-    //  */
-    // modifier onlyParticipant() {
-    //     require(_owner == msg.sender, "Caller is not the owner");
-    //     _;
-    // }
-
     function getLockedPaymentInfo(string calldata txId)
         public
         view
@@ -80,31 +72,31 @@ contract SwanPayment is IPaymentMinimal, Initializable {
         override
         returns (bool)
     {
-        require(
-            !txMap[param.id]._isExisted,
-            "Payment of transaction is already locked"
-        );
-        require(
-            param.minPayment > 0 && msg.value > param.minPayment,
-            "payment should greater than min payment"
-        );
-        TxInfo storage t = txMap[param.id];
-        t.owner = msg.sender;
-        t.minPayment = param.minPayment;
-        t.recipient = param.recipient;
-        t.deadline = block.timestamp + param.lockTime;
-        t.lockedFee = msg.value;
-        t.token = NATIVE_TOKEN;
-        t._isExisted = true;
+        // require(
+        //     !txMap[param.id]._isExisted,
+        //     "Payment of transaction is already locked"
+        // );
+        // require(
+        //     param.minPayment > 0 && msg.value > param.minPayment,
+        //     "payment should greater than min payment"
+        // );
+        // TxInfo storage t = txMap[param.id];
+        // t.owner = msg.sender;
+        // t.minPayment = param.minPayment;
+        // t.recipient = param.recipient;
+        // t.deadline = block.timestamp + param.lockTime;
+        // t.lockedFee = msg.value;
+        // t.token = NATIVE_TOKEN;
+        // t._isExisted = true;
 
-        emit LockPayment(
-            param.id,
-            NATIVE_TOKEN,
-            t.lockedFee,
-            param.minPayment,
-            param.recipient,
-            t.deadline
-        );
+        // emit LockPayment(
+        //     param.id,
+        //     NATIVE_TOKEN,
+        //     t.lockedFee,
+        //     param.minPayment,
+        //     param.recipient,
+        //     t.deadline
+        // );
         return true;
     }
 
@@ -118,46 +110,47 @@ contract SwanPayment is IPaymentMinimal, Initializable {
         override
         returns (bool)
     {
-        TxInfo storage t = txMap[txId];
-        require(t._isExisted, "Transaction does not exist");
-        require(
-            t.owner == msg.sender || t.recipient == msg.sender,
-            "Invalid caller"
-        );
-        // if passed deadline, return payback to user
-        if (block.timestamp > t.deadline) {
-            require(
-                t.owner == msg.sender,
-                "Tx passed deadline, only owner can get locked tokens"
-            );
-            t._isExisted = false;
-
-            payable(address(t.owner)).transfer(t.lockedFee);
-        } else {
-            uint256 actualFee = FilecoinOracle(_oracle).getPaymentInfo(txId);
-            require(actualFee > 0, "Transaction is incompleted");
-
-            // todo: add convert rate function to get latest price
-
-            if (actualFee < t.minPayment) {
-                actualFee = t.minPayment;
-            }
-            t._isExisted = false;
-
-            console.log("actualFee is %s", actualFee);
-            console.log("locked fee is %s", t.lockedFee);
-
-            if (t.lockedFee > actualFee) {
-                payable(address(t.owner)).transfer(t.lockedFee - actualFee);
-            } else {
-                actualFee = t.lockedFee;
-            }
-            payable(address(t.recipient)).transfer(actualFee);
-        }
-        t.minPayment = 0;
-        t.lockedFee = 0;
-       
         return true;
+        // TxInfo storage t = txMap[txId];
+        // require(t._isExisted, "Transaction does not exist");
+        // require(
+        //     t.owner == msg.sender || t.recipient == msg.sender,
+        //     "Invalid caller"
+        // );
+        // // if passed deadline, return payback to user
+        // if (block.timestamp > t.deadline) {
+        //     require(
+        //         t.owner == msg.sender,
+        //         "Tx passed deadline, only owner can get locked tokens"
+        //     );
+        //     t._isExisted = false;
+
+        //     payable(address(t.owner)).transfer(t.lockedFee);
+        // } else {
+        //     uint256 actualFee = FilswanOracle(_oracle).getPaymentInfo(txId);
+        //     require(actualFee > 0, "Transaction is incompleted");
+
+        //     // todo: add convert rate function to get latest price
+
+        //     if (actualFee < t.minPayment) {
+        //         actualFee = t.minPayment;
+        //     }
+        //     t._isExisted = false;
+
+        //     console.log("actualFee is %s", actualFee);
+        //     console.log("locked fee is %s", t.lockedFee);
+
+        //     if (t.lockedFee > actualFee) {
+        //         payable(address(t.owner)).transfer(t.lockedFee - actualFee);
+        //     } else {
+        //         actualFee = t.lockedFee;
+        //     }
+        //     payable(address(t.recipient)).transfer(actualFee);
+        // }
+        // t.minPayment = 0;
+        // t.lockedFee = 0;
+       
+        // return true;
     }
 
     /// @notice Deposits the amount of token for specific transaction
@@ -165,6 +158,7 @@ contract SwanPayment is IPaymentMinimal, Initializable {
     /// @return Returns true for a successful deposit, false for an unsuccessful deposit
     function lockTokenPayment(lockPaymentParam calldata param)
         public
+        override
         returns (bool)
     {
         require(
@@ -203,7 +197,7 @@ contract SwanPayment is IPaymentMinimal, Initializable {
     /// @notice real fee is greater than tx.fee, take tx.fee
     /// real fee is less than tx.minPayment, take minPayment, return tx.fee - minPayment to tx.owner
     /// otherwise, take real fee, return tx.fee - real fee to tx.owner
-    /// @param unlockPaymentParam 
+    /// @param param data
     /// @return Returns true for a successful payment, false for an unsuccessful payment
     function unlockTokenPayment(
         unlockPaymentParam calldata param
@@ -227,7 +221,7 @@ contract SwanPayment is IPaymentMinimal, Initializable {
             require(param.amount > 0, "Transaction is incompleted");
 
             require(
-                FilecoinOracle(_oracle).isPaymentAvailable(
+                FilswanOracle(_oracle).isPaymentAvailable(
                     param.id,
                     param.orderId,
                     param.dealId,
@@ -238,7 +232,7 @@ contract SwanPayment is IPaymentMinimal, Initializable {
                 "illegal unlock action"
             );
             // get spend token amount
-            uint256 tokenAmount = IPriceFeed(_priceFeed).getSwapAmount(paid);
+            uint256 tokenAmount = IPriceFeed(_priceFeed).consult(_ERC20_TOKEN, param.amount);
 
             if (tokenAmount < t.minPayment) {
                 tokenAmount = t.minPayment;
@@ -256,9 +250,9 @@ contract SwanPayment is IPaymentMinimal, Initializable {
                 tokenAmount = t.lockedFee;
                 t.lockedFee = 0; // prevent re-entrying
             }
-            IERC20(_ERC20_TOKEN).transfer(recipient, tokenAmount);
+            IERC20(_ERC20_TOKEN).transfer(t.recipient, tokenAmount);
         }
-        
+
         return true;
     }
 }

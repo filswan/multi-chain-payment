@@ -13,7 +13,7 @@ contract FilswanOracle is Initializable, Ownable, AccessControl {
     uint8 private _threshold;
 
     mapping(string => mapping(address => TxOracleInfo)) txInfoMap;
-    mapping(bytes => uint8) txVoteMap;
+    mapping(bytes32 => uint8) txVoteMap;
     struct TxOracleInfo {
         uint256 paid;
         uint256 terms;
@@ -41,6 +41,15 @@ contract FilswanOracle is Initializable, Ownable, AccessControl {
     //     _owner = owner;
     // }
 
+    function updateThreshold(uint8 threshold)
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        returns (bool)
+    {
+        _threshold = threshold;
+        return true;
+    }
+
     function setDAOUsers(address[] calldata daoUsers)
         public
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -61,15 +70,15 @@ contract FilswanOracle is Initializable, Ownable, AccessControl {
     }
 
     function signTransaction(
-        string cid,
-        string orderId,
-        string dealId,
+        string memory cid,
+        string memory orderId,
+        string memory dealId,
         uint256 paid,
         address recipient,
         uint256 terms, 
         bool status
     ) public onlyRole(DAO_ROLE) {
-        string key = concatenate(cid, orderId, dealId);
+        string memory key = concatenate(cid, orderId, dealId);
 
         // todo: improvement, DAO only can sign once for each transaction 
         require(
@@ -96,14 +105,14 @@ contract FilswanOracle is Initializable, Ownable, AccessControl {
             recipient,
             paid,
             terms,
-            status
+            status // bool
         );
     }
 
     function isPaymentAvailable(
-        string cid,
-        string orderId,
-        string dealId,
+        string memory cid,
+        string memory orderId,
+        string memory dealId,
         uint256 paid,
         address recipient,
         bool status
