@@ -2,11 +2,13 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+
 import "hardhat/console.sol";
 
-contract FilswanOracle is Initializable, Ownable, AccessControl {
+contract FilswanOracle is OwnableUpgradeable, AccessControlUpgradeable {
 
     bytes32 public constant DAO_ROLE = keccak256("DAO_ROLE");
 
@@ -32,14 +34,12 @@ contract FilswanOracle is Initializable, Ownable, AccessControl {
         bool status
     );
 
-    function initialize(address owner, address admin, uint8 threshold) public initializer {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    function initialize(address admin, uint8 threshold) public initializer {
+        __Ownable_init();
+        __AccessControl_init();
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _threshold = threshold;
     }
-
-    // constructor(address owner) {
-    //     _owner = owner;
-    // }
 
     function updateThreshold(uint8 threshold)
         public

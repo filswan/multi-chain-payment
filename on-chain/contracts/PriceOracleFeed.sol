@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.6.6;
 
-import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
+// import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol';
 import '@uniswap/lib/contracts/libraries/FixedPoint.sol';
 
@@ -9,16 +9,16 @@ import '@uniswap/v2-periphery/contracts/libraries/UniswapV2OracleLibrary.sol';
 import '@uniswap/v2-periphery/contracts/libraries/UniswapV2Library.sol';
 
 import "./interfaces/IPriceFeed.sol";
-
+import "hardhat/console.sol";
 
 contract PriceOracleFeed is IPriceFeed {
     using FixedPoint for *;
 
     uint public constant PERIOD = 24 hours;
 
-    IUniswapV2Pair immutable pair;
-    address public immutable token0;
-    address public immutable token1;
+    IUniswapV2Pair  pair;
+    address public  token0;
+    address public  token1;
 
     uint    public price0CumulativeLast;
     uint    public price1CumulativeLast;
@@ -26,18 +26,34 @@ contract PriceOracleFeed is IPriceFeed {
     FixedPoint.uq112x112 public price0Average;
     FixedPoint.uq112x112 public price1Average;
 
+
+    address private _factory;
+
+
     constructor(address factory, address tokenA, address tokenB) public {
         IUniswapV2Pair _pair = IUniswapV2Pair(UniswapV2Library.pairFor(factory, tokenA, tokenB));
+
         pair = _pair;
         token0 = _pair.token0();
         token1 = _pair.token1();
-        price0CumulativeLast = _pair.price0CumulativeLast(); // fetch the current accumulated price value (1 / 0)
-        price1CumulativeLast = _pair.price1CumulativeLast(); // fetch the current accumulated price value (0 / 1)
-        uint112 reserve0;
-        uint112 reserve1;
-        (reserve0, reserve1, blockTimestampLast) = _pair.getReserves();
-        require(reserve0 != 0 && reserve1 != 0, 'ExampleOracleSimple: NO_RESERVES'); // ensure that there's liquidity in the pair
+        // price0CumulativeLast = _pair.price0CumulativeLast(); // fetch the current accumulated price value (1 / 0)
+        // price1CumulativeLast = _pair.price1CumulativeLast(); // fetch the current accumulated price value (0 / 1)
+        // uint112 reserve0;
+        // uint112 reserve1;
+        // (reserve0, reserve1, blockTimestampLast) = _pair.getReserves();
+        // require(reserve0 != 0 && reserve1 != 0, 'ExampleOracleSimple: NO_RESERVES'); // ensure that there's liquidity in the pair
     }
+
+    // function initialize(address factory, address tokenA, address tokenB) public {
+    //      IUniswapV2Pair _pair = IUniswapV2Pair(UniswapV2Library.pairFor(factory, tokenA, tokenB));
+
+    //     pair = _pair;
+    //     token0 = _pair.token0();
+    //     token1 = _pair.token1();
+    //     price0CumulativeLast = _pair.price0CumulativeLast(); // fetch the current accumulated price value (1 / 0)
+    //     price1CumulativeLast = _pair.price1CumulativeLast(); // fetch the current accumulated price value (0 / 1)
+
+    // }
 
     function update() external {
         (uint price0Cumulative, uint price1Cumulative, uint32 blockTimestamp) =

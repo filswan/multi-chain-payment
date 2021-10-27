@@ -19,16 +19,16 @@ contract SwanPayment is IPaymentMinimal, Initializable {
     address private _oracle;
     address private _priceFeed;
 
-    uint256 lockTime = 5 days;
-    mapping(string => TxInfo) txMap;
+    uint256 private lockTime;
+    mapping(string => TxInfo) private txMap;
 
-    function initialize(address owner, address ERC20_TOKEN) public initializer {
+    function initialize(address owner, address ERC20_TOKEN, address oracle, address priceFeed) public initializer {
         _owner = owner;
         _ERC20_TOKEN = ERC20_TOKEN;
-    }
-
-    constructor(address owner) public {
-        _owner = owner;
+        _oracle = oracle;
+        _priceFeed = priceFeed;
+        lockTime = 5 days;
+        
     }
 
     /**
@@ -41,6 +41,11 @@ contract SwanPayment is IPaymentMinimal, Initializable {
 
     function setOracle(address oracle) public onlyOwner returns (bool) {
         _oracle = oracle;
+        return true;
+    }
+
+    function setPriceFeed(address priceFeed) public onlyOwner returns (bool) {
+        _priceFeed = priceFeed;
         return true;
     }
 
