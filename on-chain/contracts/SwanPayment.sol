@@ -176,7 +176,7 @@ contract SwanPayment is IPaymentMinimal, Initializable {
         );
 
         require(IERC20(_ERC20_TOKEN).allowance(msg.sender, address(this)) >= param.amount, "please approve spending token");
-        IERC20(_ERC20_TOKEN).transfer(address(this), param.amount);
+        IERC20(_ERC20_TOKEN).transferFrom(msg.sender, address(this), param.amount);
 
         TxInfo storage t = txMap[param.id];
         t.owner = msg.sender;
@@ -255,7 +255,7 @@ contract SwanPayment is IPaymentMinimal, Initializable {
                 tokenAmount = t.lockedFee;
                 t.lockedFee = 0; // prevent re-entrying
             }
-            IERC20(_ERC20_TOKEN).transfer(t.recipient, tokenAmount);
+            IERC20(_ERC20_TOKEN).transfer(param.recipient, tokenAmount);
         }
 
         return true;

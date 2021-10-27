@@ -30,8 +30,8 @@ async function main() {
 
 
   const usdcAddress = "0xe11A86849d99F524cAC3E7A0Ec1241828e332C62";
-  // const wFilAddress = "0x97916e6CC8DD75c6E6982FFd949Fc1768CF8c055";
-  // const pairAddress = "0x74038ed7D891A043d4aF41FeA242ED01914c2636";
+  const wFilAddress = "0x97916e6CC8DD75c6E6982FFd949Fc1768CF8c055";
+  const pairAddress = "0x74038ed7D891A043d4aF41FeA242ED01914c2636";
 
   // const priceFeedContract = await ethers.getContractFactory("PriceFeed");
   // // todo: add tokenA and tokenB address
@@ -54,7 +54,7 @@ async function main() {
   console.log(`swanPaymentInstance address: ${swanPaymentInstance.address}`)
 
   const swanPaymentAddress  = "0xABeAAb124e6b52afFF504DB71bbF08D0A768D053";
-  
+
   // swanPaymentInstance address: 0xABeAAb124e6b52afFF504DB71bbF08D0A768D053
 
   // const contract = await ethers.getContractFactory("SwanPayment");

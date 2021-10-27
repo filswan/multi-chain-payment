@@ -53,7 +53,7 @@ module.exports = {
       accounts: [process.env.ownerPK]
     },
     matictest: {
-      url: "https://rpc-mumbai.maticvigil.com",
+      url: "https://matic-mumbai.chainstacklabs.com/", // https://forum.openzeppelin.com/t/hardhat-upgrade-failing-with-hh110-on-matic-testnet/12911
       accounts: [process.env.ownerPK],
       gasPrice: 8000000000,
     },
