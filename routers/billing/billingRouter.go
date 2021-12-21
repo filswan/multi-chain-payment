@@ -1,8 +1,6 @@
 package billing
 
 import (
-	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"math/big"
 	"net/http"
@@ -13,7 +11,6 @@ import (
 	"payment-bridge/common/utils"
 	"payment-bridge/logs"
 	"payment-bridge/models"
-	"reflect"
 	"strconv"
 	"strings"
 )
@@ -59,7 +56,7 @@ func GetLockPaymentInfoByPayloadCid(c *gin.Context) {
 }
 
 func UpdateLockPaymentInfoByPayloadCid(c *gin.Context) {
-	logs.GetLogger().Info("~~~~~~~~~~~~~~~~~~~~~~~~ start to update lock payment status to db ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+	/*logs.GetLogger().Info("~~~~~~~~~~~~~~~~~~~~~~~~ start to update lock payment status to db ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 	authorization := c.Request.Header.Get("authorization")
 	if len(authorization) == 0 {
 		c.JSON(http.StatusUnauthorized, common.CreateErrorResponse(errorinfo.NO_AUTHORIZATION_TOKEN_ERROR_CODE, errorinfo.NO_AUTHORIZATION_TOKEN_ERROR_MSG))
@@ -114,7 +111,7 @@ func UpdateLockPaymentInfoByPayloadCid(c *gin.Context) {
 				return
 			}
 		}
-	}
+	}*/
 	c.JSON(http.StatusOK, common.CreateSuccessResponse(""))
 }
 func GetUserBillingHistory(c *gin.Context) {
