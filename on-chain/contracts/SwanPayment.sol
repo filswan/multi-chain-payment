@@ -54,13 +54,17 @@ contract SwanPayment is IPaymentMinimal, Initializable {
         return true;
     }
 
-    function setChainlinkOracle(address _chainlinkOracle)
+    function setChainlinkOracle(address chainlinkOracle)
         public
         onlyOwner
         returns (bool)
     {
-        _chainlinkOracle = _chainlinkOracle;
+        _chainlinkOracle = chainlinkOracle;
         return true;
+    }
+
+    function getChainlinkOracle() public view returns (address) {
+        return _chainlinkOracle;
     }
 
     function setPriceFeed(address priceFeed) public onlyOwner returns (bool) {
@@ -142,7 +146,6 @@ contract SwanPayment is IPaymentMinimal, Initializable {
             t._isExisted = true;
             t.size = param.size;
             t.copyLimit = param.copyLimit;
-
         } else {
             TxInfo storage t = txMap[param.id];
             t.owner = msg.sender;
@@ -196,53 +199,63 @@ contract SwanPayment is IPaymentMinimal, Initializable {
         return true;
     }
 
-    function unlockCarPayment(string calldata dealId, string calldata network, address recipient)
-        public
-        override
-        returns (bool)
-    {
+    function unlockCarPayment(
+        string calldata dealId,
+        string calldata network,
+        address recipient
+    ) public override returns (bool) {
         require(
-            FilswanOracle(_oracle).isCarPaymentAvailable(dealId, network, recipient),
-            "illegal unlock car action"
+            FilswanOracle(_oracle).isCarPaymentAvailable(
+                dealId,
+                network,
+                recipient
+            ),
+            "illegal unlock"
         );
+
+        // get cid list
+        string[] memory cidList = FilswanOracle(_oracle).getCidList(
+            dealId,
+            network
+        );
+
+        require(cidList.length > 0, "empty cid list");
 
         uint256 tokenAmount = 0;
         // get spend token amount
-        uint256 serviceCost = FilinkConsumer(_chainlinkOracle).getPrice(dealId, network);
+        uint256 serviceCost = FilinkConsumer(_chainlinkOracle).getPrice(
+            dealId,
+            network
+        );
 
-        // get cid list
-        string[] memory cidList = FilswanOracle(_oracle).getCidList(dealId, network);
+        require(serviceCost > 0, "cost is 0");
 
-        if (serviceCost > 0) {
-            tokenAmount = IPriceFeed(_priceFeed).consult(
-                _ERC20_TOKEN,
-                serviceCost
-            );
-            uint256 size = 0;
-            for (uint8 i = 0; i < cidList.length; i++) {
-                TxInfo storage t = txCarMap[cidList[i]];
-                if (!t._isExisted) {
-                    continue;
-                } else {
-                    size += t.size;
-                }
+        tokenAmount = IPriceFeed(_priceFeed).consult(_ERC20_TOKEN, serviceCost);
+        require(tokenAmount > 0, "price feed err");
+        uint256 size = 0;
+        for (uint8 i = 0; i < cidList.length; i++) {
+            TxInfo storage t = txCarMap[cidList[i]];
+            if (!t._isExisted) {
+                continue;
+            } else {
+                size += t.size;
             }
-
-            require(size > 0, "file size should be greater than 0");
-
-            uint256 unitPrice = tokenAmount / size;
-            for (uint8 i = 0; i < cidList.length; i++) {
-                TxInfo storage t = txCarMap[cidList[i]];
-                uint256 cost = unitPrice * t.size;
-
-                t.lockedFee = t.lockedFee - cost;
-                if (t.lockedFee < 0) {
-                    t.lockedFee = 0;
-                }
-            }
-
-            IERC20(_ERC20_TOKEN).transfer(recipient, tokenAmount);
         }
+
+        require(size > 0, "file size is 0");
+
+        uint256 unitPrice = tokenAmount / size;
+        for (uint8 i = 0; i < cidList.length; i++) {
+            TxInfo storage t = txCarMap[cidList[i]];
+            uint256 cost = unitPrice * t.size;
+
+            t.lockedFee = t.lockedFee - cost;
+            if (t.lockedFee < 0) {
+                t.lockedFee = 0;
+            }
+        }
+
+        IERC20(_ERC20_TOKEN).transfer(recipient, tokenAmount);
 
         return true;
     }

@@ -80,7 +80,7 @@ contract FilinkConsumer is ChainlinkClient {
         string memory key = concatenate(deal, network);
         
         // Set the URL to perform the GET request on
-        request.add("get", concatenate("https://cxq4eshb10.execute-api.us-east-1.amazonaws.com/default/test2?deal=", params));
+        request.add("get", concatenate("http://35.168.51.2:7886/?deal=", params));
         // request.add("deal", deal);
 
         request.add("path", "data.deal.storage_price");

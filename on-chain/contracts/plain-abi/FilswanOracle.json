@@ -7,6 +7,7 @@
   "function DAO_ROLE() view returns (bytes32)",
   "function DEFAULT_ADMIN_ROLE() view returns (bytes32)",
   "function getCarPaymentVotes(string,string,address) view returns (uint8)",
+  "function getChainlinkOracle() view returns (address)",
   "function getCidList(string,string) view returns (string[])",
   "function getRoleAdmin(bytes32) view returns (bytes32)",
   "function getSignatureList(string,string) view returns (tuple(uint256,uint256,address,bool,bool,string[],address,uint256,uint256)[])",
