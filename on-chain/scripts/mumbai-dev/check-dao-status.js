@@ -13,7 +13,7 @@ async function main() {
   // 'filecoin_calibration');
   // console.log(result);
 
-  const result = await daoOracleInstance.getCarPaymentVotes('87881',
+  const result = await daoOracleInstance.getCarPaymentVotes('87893',
     'filecoin_calibration','0xc4fcaAdCb0b00a9501e56215c37B10fAF9e79c0a');
     console.log(result);
 
