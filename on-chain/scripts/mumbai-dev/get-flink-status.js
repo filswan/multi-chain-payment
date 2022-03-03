@@ -14,7 +14,7 @@ async function main() {
   // 'filecoin_calibration');
   // console.log(result);
 
-  const result = await instance.getPrice('87893','filecoin_calibration');
+  const result = await instance.getPrice('58160','filecoin_mainnet');
     console.log(result);
 
   // const hasRole = await daoOracleInstance.connect(signer).hasRole(
