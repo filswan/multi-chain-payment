@@ -12,7 +12,7 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const chainlinkContract = await ethers.getContractFactory("FilinkConsumer");
+  const chainlinkContract = await ethers.getContractFactory("FilinkConsumerV0");
   // const chainlinkInstance = await chainlinkContract.deploy();
   // await chainlinkInstance.deployed();
 
