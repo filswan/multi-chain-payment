@@ -48,14 +48,16 @@ Chain ID: **80001**
 |Contract   |  Address |
 |---|---|
 | mcp_payment_contract  | 0x7ab09f9Ab4D39cfBE0551dfb6AdAc63C89bB955b  |
-| dao_contract  | 0x00233B4d7A9d84b9c6440015A287DE2c5436F5D3  |
+| dao_signature_contract  | 0x00233B4d7A9d84b9c6440015A287DE2c5436F5D3  |
 | flink_service_contract  | 0x87a3823CAda97EaD026284d90A73549BE3864afB  |
 | DEX pool price_feed_address  | 0xe8a67994c114e0c17E1c135d0CB599a2394f1505  |
 | usdc token address  | 0xe11A86849d99F524cAC3E7A0Ec1241828e332C62  |
 | wFil token address  | 0x97916e6CC8DD75c6E6982FFd949Fc1768CF8c055  |
 
-#### Wallet List
-... add wallet addresses
+#### DAO Singnature Wallet List
+0x800210CfB747992790245eA878D32F188d01a03A  
+0x05856015d07F3E24936B7D20cB3CcfCa3D34B41d  
+0x6f2B76024196e82D81c8bC5eDe7cff0B0276c9C1
 
 ## Development
 
