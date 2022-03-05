@@ -8,7 +8,7 @@ const overrides = {
 
 async function main() {
 
-  const filinkAddress = "0x87a3823CAda97EaD026284d90A73549BE3864afB";
+  const filinkAddress = "0x917347c86B6bd1536d125d1b2FE8687F9fa3091F";
 
   const oracleDAOContractAddress = "0x00233B4d7A9d84b9c6440015A287DE2c5436F5D3";
 

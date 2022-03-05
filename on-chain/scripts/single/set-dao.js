@@ -10,8 +10,12 @@ async function main() {
   const addressList = [
     "0x800210CfB747992790245eA878D32F188d01a03A",
     "0x05856015d07F3E24936B7D20cB3CcfCa3D34B41d",
-    "0x6f2B76024196e82D81c8bC5eDe7cff0B0276c9C1"
+    "0x6f2B76024196e82D81c8bC5eDe7cff0B0276c9C1",
+    "0x591f62C3FDC087dADC8A02dF76fD0a2Bd2168CDF",
+    "0xE41c53Eb9fce0AC9D204d4F361e28a8f28559D54"
   ];
+
+  
 
   const [signer] = await ethers.getSigners();
 
