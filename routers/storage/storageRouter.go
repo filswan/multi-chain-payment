@@ -23,7 +23,7 @@ import (
 
 func SendDealManager(router *gin.RouterGroup) {
 	router.POST("/ipfs/upload", UploadFileToIpfs)
-	router.POST("/ipfs/upload", BatchUploadFileToIpfs)
+	router.POST("/ipfs/batchupload", BatchUploadFileToIpfs)
 	//router.GET("/lotus/deal/:task_uuid", SendDeal)
 	router.GET("/tasks/deals", GetDealListFromLocal)
 	router.GET("/deal/detail/:deal_id", GetDealListFromFilink)
