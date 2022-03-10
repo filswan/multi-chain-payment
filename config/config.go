@@ -14,6 +14,7 @@ type Configuration struct {
 	Dev                  bool         `toml:"dev"`
 	SwanApi              swanApi      `toml:"swan_api"`
 	IpfsServer           ipfsServer   `toml:"ipfs_server"`
+	MaxMultipartMemory   int64        `toml:"max_multipart_memory"`
 	Lotus                lotus        `toml:"lotus"`
 	SwanTask             swanTask     `toml:"swan_task"`
 	ScheduleRule         ScheduleRule `toml:"schedule_rule"`
