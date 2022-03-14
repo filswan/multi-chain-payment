@@ -196,4 +196,5 @@ contract FilswanOracle is OwnableUpgradeable, AccessControlUpgradeable {
     ) public view returns (TxOracleInfo memory) {
         return txInfoMap[dealId][signer];
     }
+    
 }
